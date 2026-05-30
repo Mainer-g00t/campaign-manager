@@ -1,15 +1,26 @@
-version: '3.9'
-
 services:
   app:
     build:
       context: .
       dockerfile: Dockerfile
+    container_name: campaign-manager
     ports:
-      - '3000:3000'
+      - '3001:3001'
     volumes:
       - ./data:/app/data
     environment:
-      APP_URL: http://localhost:3000
+      PORT: 3001
+      # Public URL used for the CDR callback sent to the VoIP platform.
+      # If running behind a reverse proxy or exposing externally, change this.
+      APP_URL: http://campaign-manager:3001
       DATABASE_URL: file:/app/data/campaign-manager.db
+      # Default VoIP base URL — config-api is reachable via the shared voiceai network
+      VOIP_BASE_URL: http://config-api:8080
+    networks:
+      - voiceai
     restart: unless-stopped
+
+networks:
+  voiceai:
+    external: true
+    name: voice-asterisk-agent_voiceai
