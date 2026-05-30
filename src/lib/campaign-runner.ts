@@ -75,9 +75,12 @@ export async function runCampaign(campaignId: string) {
     }
 
     try {
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+      if (campaign.api_key) headers['X-Api-Key'] = campaign.api_key
+
       const response = await fetch(`${campaign.voip_base_url}/api/outbound/originate`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify(payload),
       })
 

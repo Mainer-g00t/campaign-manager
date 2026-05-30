@@ -6,7 +6,7 @@ export async function POST(req: NextRequest) {
   const db = await getDb()
   try {
     const body = await req.json()
-    const { name, agent_slug, voip_base_url, template_vars } = body
+    const { name, agent_slug, voip_base_url, api_key, template_vars } = body
 
     if (!name || !agent_slug || !voip_base_url) {
       return NextResponse.json(
@@ -23,6 +23,7 @@ export async function POST(req: NextRequest) {
       name,
       agent_slug,
       voip_base_url,
+      api_key: api_key || null,
       template_vars: JSON.stringify(template_vars ?? {}),
       status: 'draft',
       created_at: now,

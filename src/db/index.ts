@@ -17,6 +17,7 @@ async function initSchema() {
       agent_slug TEXT NOT NULL,
       template_vars TEXT NOT NULL DEFAULT '{}',
       voip_base_url TEXT NOT NULL,
+      api_key TEXT,
       status TEXT NOT NULL DEFAULT 'draft',
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL
@@ -51,6 +52,12 @@ async function initSchema() {
       created_at TEXT NOT NULL
     );
   `)
+
+  // Additive migrations — safe to run repeatedly
+  await pool.query(`
+    ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS api_key TEXT;
+  `)
+
   initialized = true
 }
 

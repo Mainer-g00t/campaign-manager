@@ -13,6 +13,7 @@ export default function NewCampaignPage() {
   const [name, setName] = useState('')
   const [agentSlug, setAgentSlug] = useState('')
   const [voipBaseUrl, setVoipBaseUrl] = useState('http://config-api:8080')
+  const [apiKey, setApiKey] = useState('')
   const [templateVars, setTemplateVars] = useState<KVPair[]>([{ key: '', value: '' }])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -49,6 +50,7 @@ export default function NewCampaignPage() {
           name,
           agent_slug: agentSlug,
           voip_base_url: voipBaseUrl,
+          api_key: apiKey || null,
           template_vars: tvObj,
         }),
       })
@@ -123,6 +125,20 @@ export default function NewCampaignPage() {
             className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
           <p className="text-xs text-gray-400 mt-1">Base URL for the voice AI platform API</p>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            API Key
+          </label>
+          <input
+            type="password"
+            value={apiKey}
+            onChange={(e) => setApiKey(e.target.value)}
+            placeholder="sk-va-abc123..."
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+          <p className="text-xs text-gray-400 mt-1">Sent as <span className="font-mono">X-Api-Key</span> header when originating calls. Leave blank if your platform does not require auth.</p>
         </div>
 
         <div>

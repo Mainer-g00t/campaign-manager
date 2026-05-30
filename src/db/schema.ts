@@ -6,6 +6,7 @@ export const campaigns = pgTable('campaigns', {
   agent_slug: text('agent_slug').notNull(),
   template_vars: text('template_vars').notNull().default('{}'), // JSON
   voip_base_url: text('voip_base_url').notNull(),
+  api_key: text('api_key'),                          // X-Api-Key header for VoIP platform
   status: text('status').notNull().default('draft'), // draft|active|paused|completed
   created_at: text('created_at').notNull(),
   updated_at: text('updated_at').notNull(),
