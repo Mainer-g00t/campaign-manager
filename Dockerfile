@@ -11,7 +11,7 @@ WORKDIR /app
 COPY package.json package-lock.json* ./
 
 # Install all deps including dev (needed for build)
-RUN npm ci
+RUN npm install
 
 # Rebuild better-sqlite3 for the target platform (linux/x64)
 RUN npm rebuild better-sqlite3
