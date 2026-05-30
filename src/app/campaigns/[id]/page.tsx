@@ -24,6 +24,21 @@ interface Contact {
   created_at: string
 }
 
+interface Call {
+  id: string
+  call_uuid: string | null
+  destination: string | null
+  status: string | null
+  started_at: string | null
+  ended_at: string | null
+  duration_seconds: number | null
+  turn_count: number | null
+  end_reason: string | null
+  created_at: string
+  contact_first_name: string | null
+  contact_last_name: string | null
+}
+
 interface Stats {
   total: number
   pending: number
@@ -54,17 +69,20 @@ export default function CampaignDetailPage() {
 
   const [campaign, setCampaign] = useState<Campaign | null>(null)
   const [contacts, setContacts] = useState<Contact[]>([])
+  const [calls, setCalls] = useState<Call[]>([])
   const [stats, setStats] = useState<Stats | null>(null)
   const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState(false)
   const [error, setError] = useState('')
+  const [activeTab, setActiveTab] = useState<'contacts' | 'cdrs'>('contacts')
 
   const fetchData = useCallback(async () => {
     try {
-      const [campRes, contactsRes, statsRes] = await Promise.all([
+      const [campRes, contactsRes, statsRes, callsRes] = await Promise.all([
         fetch(`/api/campaigns/${id}`),
         fetch(`/api/campaigns/${id}/contacts`),
         fetch(`/api/campaigns/${id}/stats`),
+        fetch(`/api/campaigns/${id}/calls`),
       ])
 
       if (!campRes.ok) {
@@ -72,15 +90,17 @@ export default function CampaignDetailPage() {
         return
       }
 
-      const [campData, contactsData, statsData] = await Promise.all([
+      const [campData, contactsData, statsData, callsData] = await Promise.all([
         campRes.json(),
         contactsRes.json(),
         statsRes.json(),
+        callsRes.json(),
       ])
 
       setCampaign(campData)
       setContacts(contactsData)
       setStats(statsData)
+      setCalls(callsData)
     } catch {
       setError('Failed to load campaign data')
     } finally {
@@ -240,56 +260,148 @@ export default function CampaignDetailPage() {
         </div>
       )}
 
-      {/* Contacts table */}
+      {/* Tabs */}
       <div className="bg-white rounded-xl border border-gray-200">
-        <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
-          <h2 className="font-semibold text-gray-900">Contacts ({contacts.length})</h2>
-          <span className="text-xs text-gray-400">Auto-refreshes every 5s</span>
+        {/* Tab header */}
+        <div className="px-5 py-0 border-b border-gray-100 flex items-center justify-between">
+          <div className="flex gap-0">
+            <button
+              onClick={() => setActiveTab('contacts')}
+              className={`px-4 py-4 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === 'contacts'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Contacts ({contacts.length})
+            </button>
+            <button
+              onClick={() => setActiveTab('cdrs')}
+              className={`px-4 py-4 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === 'cdrs'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Call Records ({calls.length})
+            </button>
+          </div>
+          <span className="text-xs text-gray-400 pr-1">Auto-refreshes every 5s</span>
         </div>
 
-        {contacts.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-400">No contacts yet</p>
-            <Link
-              href={`/campaigns/${id}/import`}
-              className="mt-3 inline-block text-blue-600 hover:underline text-sm"
-            >
-              Import contacts
-            </Link>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="text-left text-xs text-gray-500 border-b border-gray-100">
-                  <th className="px-5 py-3 font-medium">Name</th>
-                  <th className="px-5 py-3 font-medium">Phone</th>
-                  <th className="px-5 py-3 font-medium">Status</th>
-                  <th className="px-5 py-3 font-medium">Call UUID</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-50">
-                {contacts.map((contact) => (
-                  <tr key={contact.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-5 py-3 text-gray-900">
-                      {[contact.first_name, contact.last_name].filter(Boolean).join(' ') || (
-                        <span className="text-gray-400 italic">—</span>
-                      )}
-                    </td>
-                    <td className="px-5 py-3 font-mono text-gray-600">{contact.phone}</td>
-                    <td className="px-5 py-3">
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_BADGE[contact.status] ?? 'bg-gray-100 text-gray-600'}`}>
-                        {contact.status}
-                      </span>
-                    </td>
-                    <td className="px-5 py-3 font-mono text-xs text-gray-400">
-                      {contact.call_uuid ?? '—'}
-                    </td>
+        {/* Contacts tab */}
+        {activeTab === 'contacts' && (
+          contacts.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-400">No contacts yet</p>
+              <Link
+                href={`/campaigns/${id}/import`}
+                className="mt-3 inline-block text-blue-600 hover:underline text-sm"
+              >
+                Import contacts
+              </Link>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="text-left text-xs text-gray-500 border-b border-gray-100">
+                    <th className="px-5 py-3 font-medium">Name</th>
+                    <th className="px-5 py-3 font-medium">Phone</th>
+                    <th className="px-5 py-3 font-medium">Status</th>
+                    <th className="px-5 py-3 font-medium">Call UUID</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {contacts.map((contact) => (
+                    <tr key={contact.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-5 py-3 text-gray-900">
+                        {[contact.first_name, contact.last_name].filter(Boolean).join(' ') || (
+                          <span className="text-gray-400 italic">—</span>
+                        )}
+                      </td>
+                      <td className="px-5 py-3 font-mono text-gray-600">{contact.phone}</td>
+                      <td className="px-5 py-3">
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_BADGE[contact.status] ?? 'bg-gray-100 text-gray-600'}`}>
+                          {contact.status}
+                        </span>
+                      </td>
+                      <td className="px-5 py-3 font-mono text-xs text-gray-400">
+                        {contact.call_uuid ?? '—'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )
+        )}
+
+        {/* CDRs tab */}
+        {activeTab === 'cdrs' && (
+          calls.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-400">No call records yet</p>
+              <p className="text-xs text-gray-400 mt-1">Records appear here once calls are completed</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="text-left text-xs text-gray-500 border-b border-gray-100">
+                    <th className="px-5 py-3 font-medium">Contact</th>
+                    <th className="px-5 py-3 font-medium">Phone</th>
+                    <th className="px-5 py-3 font-medium">Status</th>
+                    <th className="px-5 py-3 font-medium">Duration</th>
+                    <th className="px-5 py-3 font-medium">Turns</th>
+                    <th className="px-5 py-3 font-medium">End Reason</th>
+                    <th className="px-5 py-3 font-medium">Started</th>
+                    <th className="px-5 py-3 font-medium">Call UUID</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {calls.map((call) => (
+                    <tr key={call.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-5 py-3 text-gray-900">
+                        {[call.contact_first_name, call.contact_last_name].filter(Boolean).join(' ') || (
+                          <span className="text-gray-400 italic">—</span>
+                        )}
+                      </td>
+                      <td className="px-5 py-3 font-mono text-gray-600">{call.destination ?? '—'}</td>
+                      <td className="px-5 py-3">
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_BADGE[call.status ?? ''] ?? 'bg-gray-100 text-gray-600'}`}>
+                          {call.status ?? '—'}
+                        </span>
+                      </td>
+                      <td className="px-5 py-3 text-gray-600">
+                        {call.duration_seconds != null ? `${call.duration_seconds}s` : '—'}
+                      </td>
+                      <td className="px-5 py-3 text-gray-600 text-center">
+                        {call.turn_count ?? '—'}
+                      </td>
+                      <td className="px-5 py-3">
+                        {call.end_reason ? (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-mono bg-gray-50 border border-gray-200 text-gray-600">
+                            {call.end_reason}
+                          </span>
+                        ) : '—'}
+                      </td>
+                      <td className="px-5 py-3 text-xs text-gray-400">
+                        {call.started_at
+                          ? new Date(call.started_at).toLocaleString()
+                          : call.created_at
+                            ? new Date(call.created_at).toLocaleString()
+                            : '—'}
+                      </td>
+                      <td className="px-5 py-3 font-mono text-xs text-gray-400 max-w-[160px] truncate">
+                        {call.call_uuid ?? '—'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )
         )}
       </div>
     </div>
