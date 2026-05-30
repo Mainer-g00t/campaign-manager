@@ -1,6 +1,6 @@
-import { text, integer, sqliteTable } from 'drizzle-orm/sqlite-core'
+import { text, integer, pgTable } from 'drizzle-orm/pg-core'
 
-export const campaigns = sqliteTable('campaigns', {
+export const campaigns = pgTable('campaigns', {
   id: text('id').primaryKey(),
   name: text('name').notNull(),
   agent_slug: text('agent_slug').notNull(),
@@ -11,7 +11,7 @@ export const campaigns = sqliteTable('campaigns', {
   updated_at: text('updated_at').notNull(),
 })
 
-export const contacts = sqliteTable('contacts', {
+export const contacts = pgTable('contacts', {
   id: text('id').primaryKey(),
   campaign_id: text('campaign_id').notNull().references(() => campaigns.id),
   phone: text('phone').notNull(),
@@ -23,7 +23,7 @@ export const contacts = sqliteTable('contacts', {
   created_at: text('created_at').notNull(),
 })
 
-export const calls = sqliteTable('calls', {
+export const calls = pgTable('calls', {
   id: text('id').primaryKey(),
   campaign_id: text('campaign_id').notNull(),
   contact_id: text('contact_id').notNull(),
@@ -36,6 +36,6 @@ export const calls = sqliteTable('calls', {
   turn_count: integer('turn_count'),
   end_reason: text('end_reason'),
   transcript: text('transcript'), // JSON
-  raw_cdr: text('raw_cdr'), // JSON
+  raw_cdr: text('raw_cdr'),       // JSON
   created_at: text('created_at').notNull(),
 })

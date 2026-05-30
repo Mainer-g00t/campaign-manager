@@ -1,32 +1,14 @@
-import Database from 'better-sqlite3'
-import { drizzle } from 'drizzle-orm/better-sqlite3'
+import { drizzle } from 'drizzle-orm/node-postgres'
+import { Pool } from 'pg'
 import * as schema from './schema'
-import path from 'path'
-import fs from 'fs'
 
-function getDbPath(): string {
-  const url = process.env.DATABASE_URL || 'file:./data/campaign-manager.db'
-  // Strip "file:" prefix
-  const filePath = url.replace(/^file:/, '')
-  // Resolve relative to cwd
-  return path.resolve(process.cwd(), filePath)
-}
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+})
 
-function initDb() {
-  const dbPath = getDbPath()
-  // Ensure directory exists
-  const dir = path.dirname(dbPath)
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true })
-  }
-
-  const sqlite = new Database(dbPath)
-
-  // Enable WAL mode for better concurrent read performance
-  sqlite.pragma('journal_mode = WAL')
-
-  // Self-initializing schema — no drizzle migrations needed at runtime
-  sqlite.exec(`
+// Self-initializing schema — runs on first import
+async function initSchema() {
+  await pool.query(`
     CREATE TABLE IF NOT EXISTS campaigns (
       id TEXT PRIMARY KEY,
       name TEXT NOT NULL,
@@ -67,18 +49,9 @@ function initDb() {
       created_at TEXT NOT NULL
     );
   `)
-
-  return drizzle(sqlite, { schema })
 }
 
-// Singleton for module-level caching
-let _db: ReturnType<typeof initDb> | null = null
+// Fire-and-forget on module load; queries will queue behind the pool connection
+initSchema().catch(console.error)
 
-export function getDb() {
-  if (!_db) {
-    _db = initDb()
-  }
-  return _db
-}
-
-export const db = getDb()
+export const db = drizzle(pool, { schema })

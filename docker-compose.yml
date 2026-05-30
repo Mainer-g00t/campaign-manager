@@ -10,10 +10,10 @@ services:
       - ./data:/app/data
     environment:
       PORT: 3001
-      # Public URL used for the CDR callback sent to the VoIP platform.
-      # If running behind a reverse proxy or exposing externally, change this.
+      # Public URL used as CDR callback_url sent to the VoIP platform
       APP_URL: http://campaign-manager:3001
-      DATABASE_URL: file:/app/data/campaign-manager.db
+      # Connects to the shared postgres on the voiceai network
+      DATABASE_URL: postgresql://voiceai:${POSTGRES_PASSWORD}@postgres:5432/campaign_manager
       # Default VoIP base URL — config-api is reachable via the shared voiceai network
       VOIP_BASE_URL: http://config-api:8080
     networks:
