@@ -1,0 +1,15 @@
+version: '3.9'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./data:/app/data
+    environment:
+      APP_URL: http://localhost:3000
+      DATABASE_URL: file:/app/data/campaign-manager.db
+    restart: unless-stopped
