@@ -7,8 +7,8 @@ import { runCampaign } from '@/lib/campaign-runner'
 export async function POST(
   _req: NextRequest,
   { params }: { params: { id: string } }
-  const db = await getDb()
 ) {
+  const db = await getDb()
   const [campaign] = await db
     .select()
     .from(campaigns)

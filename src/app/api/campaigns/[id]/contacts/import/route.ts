@@ -24,9 +24,9 @@ function parseCSV(text: string): Record<string, string>[] {
 export async function POST(
   req: NextRequest,
   { params }: { params: { id: string } }
-  const db = await getDb()
 ) {
   try {
+    const db = await getDb()
     let csvText = ''
 
     const contentType = req.headers.get('content-type') ?? ''

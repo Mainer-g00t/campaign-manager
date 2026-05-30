@@ -6,8 +6,8 @@ import { eq } from 'drizzle-orm'
 export async function GET(
   _req: NextRequest,
   { params }: { params: { id: string } }
-  const db = await getDb()
 ) {
+  const db = await getDb()
   const rows = await db
     .select()
     .from(contacts)
@@ -21,6 +21,7 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
+    const db = await getDb()
     const body = await req.json()
     const { phone, first_name, last_name, extra_vars } = body
 

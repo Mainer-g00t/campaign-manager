@@ -6,12 +6,9 @@ import { eq } from 'drizzle-orm'
 export async function POST(
   _req: NextRequest,
   { params }: { params: { id: string } }
-  const db = await getDb()
 ) {
-  const [campaign] = await db
-    .select()
-    .from(campaigns)
-    .where(eq(campaigns.id, params.id))
+  const db = await getDb()
+  const [campaign] = await db.select().from(campaigns).where(eq(campaigns.id, params.id))
 
   if (!campaign) {
     return NextResponse.json({ error: 'Campaign not found' }, { status: 404 })
