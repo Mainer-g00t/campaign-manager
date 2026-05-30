@@ -12,7 +12,7 @@ export default function NewCampaignPage() {
   const router = useRouter()
   const [name, setName] = useState('')
   const [agentSlug, setAgentSlug] = useState('')
-  const [voipBaseUrl, setVoipBaseUrl] = useState('')
+  const [voipBaseUrl, setVoipBaseUrl] = useState('http://config-api:8080')
   const [templateVars, setTemplateVars] = useState<KVPair[]>([{ key: '', value: '' }])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
