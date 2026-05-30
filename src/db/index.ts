@@ -6,7 +6,9 @@ const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
 })
 
-// Self-initializing schema — runs on first import
+let initialized = false
+let initPromise: Promise<void> | null = null
+
 async function initSchema() {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS campaigns (
@@ -49,9 +51,17 @@ async function initSchema() {
       created_at TEXT NOT NULL
     );
   `)
+  initialized = true
 }
 
-// Fire-and-forget on module load; queries will queue behind the pool connection
-initSchema().catch(console.error)
+const _db = drizzle(pool, { schema })
 
-export const db = drizzle(pool, { schema })
+export async function getDb() {
+  if (!initialized) {
+    if (!initPromise) {
+      initPromise = initSchema()
+    }
+    await initPromise
+  }
+  return _db
+}

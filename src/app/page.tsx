@@ -1,4 +1,4 @@
-import { db } from '@/db'
+import { getDb } from '@/db'
 import { campaigns, contacts } from '@/db/schema'
 import { eq } from 'drizzle-orm'
 import Link from 'next/link'
@@ -13,6 +13,7 @@ const STATUS_COLORS: Record<string, string> = {
 export const dynamic = 'force-dynamic'
 
 export default async function DashboardPage() {
+  const db = await getDb()
   const allCampaigns = await db.select().from(campaigns).orderBy(campaigns.created_at)
   const allContacts = await db.select().from(contacts)
 

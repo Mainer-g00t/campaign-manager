@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@/db'
+import { getDb } from '@/db'
 import { contacts } from '@/db/schema'
 import { eq } from 'drizzle-orm'
 
 export async function GET(
   _req: NextRequest,
   { params }: { params: { id: string } }
+  const db = await getDb()
 ) {
   const rows = await db
     .select()

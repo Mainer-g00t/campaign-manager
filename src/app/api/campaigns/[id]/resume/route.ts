@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@/db'
+import { getDb } from '@/db'
 import { campaigns } from '@/db/schema'
 import { eq } from 'drizzle-orm'
 import { runCampaign } from '@/lib/campaign-runner'
@@ -7,6 +7,7 @@ import { runCampaign } from '@/lib/campaign-runner'
 export async function POST(
   _req: NextRequest,
   { params }: { params: { id: string } }
+  const db = await getDb()
 ) {
   const [campaign] = await db
     .select()

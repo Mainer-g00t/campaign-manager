@@ -1,4 +1,4 @@
-import { db } from '@/db'
+import { getDb } from '@/db'
 import { campaigns, contacts, calls } from '@/db/schema'
 import { eq, and } from 'drizzle-orm'
 
@@ -7,6 +7,7 @@ function sleep(ms: number) {
 }
 
 export async function runCampaign(campaignId: string) {
+  const db = await getDb()
   // Fetch campaign
   const [campaign] = await db
     .select()

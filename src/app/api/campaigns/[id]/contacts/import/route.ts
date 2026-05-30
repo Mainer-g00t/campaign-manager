@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@/db'
+import { getDb } from '@/db'
 import { contacts } from '@/db/schema'
 
 function parseCSV(text: string): Record<string, string>[] {
@@ -24,6 +24,7 @@ function parseCSV(text: string): Record<string, string>[] {
 export async function POST(
   req: NextRequest,
   { params }: { params: { id: string } }
+  const db = await getDb()
 ) {
   try {
     let csvText = ''

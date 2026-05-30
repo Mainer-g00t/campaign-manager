@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@/db'
+import { getDb } from '@/db'
 import { campaigns } from '@/db/schema'
 
 export async function POST(req: NextRequest) {
+  const db = await getDb()
   try {
     const body = await req.json()
     const { name, agent_slug, voip_base_url, template_vars } = body

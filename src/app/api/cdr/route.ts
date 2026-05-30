@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@/db'
+import { getDb } from '@/db'
 import { contacts, calls } from '@/db/schema'
 import { eq, or } from 'drizzle-orm'
 
 export async function POST(req: NextRequest) {
+  const db = await getDb()
   try {
     const body = await req.json()
 
